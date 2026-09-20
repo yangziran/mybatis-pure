@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>cn.kunter.mybatis.pure</groupId>
+        <artifactId>mybatis-pure-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mybatis-pure-spring-boot-starter</artifactId>
+    <name>MyBatis-Pure Spring Boot Starter</name>
+    <description>Starter for integrating MyBatis-Pure with Spring Boot</description>
+
+    <properties>
+        <spring-boot.version>4.1.1</spring-boot.version>
+        <mybatis-spring-boot.version>4.1.0</mybatis-spring-boot.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.kunter.mybatis.pure</groupId>
+            <artifactId>mybatis-pure-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>${spring-boot.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>${mybatis-spring-boot.version}</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+</project>

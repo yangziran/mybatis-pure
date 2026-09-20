@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>cn.kunter.mybatis.pure</groupId>
+        <artifactId>mybatis-pure-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>mybatis-pure-apt</artifactId>
+    <name>MyBatis-Pure APT</name>
+    <description>Annotation Processor for MyBatis-Pure, generates Dynamic SQL Support classes</description>
+
+    <properties>
+        <auto-service.version>1.1.1</auto-service.version>
+        <javapoet.version>1.13.0</javapoet.version>
+    </properties>
+
+    <dependencies>
+        <!-- 核心模块依赖，用于读取注解如 @Table -->
+        <dependency>
+            <groupId>cn.kunter.mybatis.pure</groupId>
+            <artifactId>mybatis-pure-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- JavaPoet 用于生成优雅的 Java 源代码 -->
+        <dependency>
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+            <version>${javapoet.version}</version>
+        </dependency>
+
+        <!-- AutoService 自动生成 SPI 注册文件 -->
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>${auto-service.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 编译插件配置，关键：在此模块编译期间禁用自身的 annotation processing -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.15.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <compilerArgument>-proc:none</compilerArgument>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
