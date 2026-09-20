@@ -12,16 +12,16 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface LogicDelete {
 
-	/**
-	 * 未删除时的值
-	 * @return 默认值为 1
-	 */
-	int unDeletedValue() default 1;
+    /**
+     * 未删除时的值
+     * @return 默认值为 1
+     */
+    int unDeletedValue() default 1;
 
-	/**
-	 * 已删除时的值
-	 * @return 默认值为 0
-	 */
-	int deletedValue() default 0;
+    /**
+     * 已删除时的值
+     * @return 默认值为 0
+     */
+    int deletedValue() default 0;
 
 }

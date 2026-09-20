@@ -1,7 +1,5 @@
 package cn.kunter.mybatis.pure.spring.autoconfigure;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -10,6 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class MybatisPureAutoConfiguration {
 
-	/* 其他自动配置 */
+    /* 其他自动配置 */
 
 }

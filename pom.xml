@@ -23,7 +23,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        
+
         <mybatis.version>3.5.19</mybatis.version>
         <mybatis.dynamic.sql.version>2.0.0</mybatis.dynamic.sql.version>
     </properties>
@@ -43,7 +43,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <build>
         <plugins>
             <plugin>

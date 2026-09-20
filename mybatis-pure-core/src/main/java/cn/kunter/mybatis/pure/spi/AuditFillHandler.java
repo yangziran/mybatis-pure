@@ -7,18 +7,18 @@ import cn.kunter.mybatis.pure.metadata.EntityMetadata;
  */
 public interface AuditFillHandler {
 
-	/**
-	 * 插入时触发
-	 * @param entity 实体对象
-	 * @param metadata 实体元数据
-	 */
-	void fillInsert(Object entity, EntityMetadata metadata);
+    /**
+     * 插入时触发
+     * @param entity 实体对象
+     * @param metadata 实体元数据
+     */
+    void fillInsert(Object entity, EntityMetadata metadata);
 
-	/**
-	 * 更新时触发（例如 updateById）
-	 * @param entity 实体对象
-	 * @param metadata 实体元数据
-	 */
-	void fillUpdate(Object entity, EntityMetadata metadata);
+    /**
+     * 更新时触发（例如 updateById）
+     * @param entity 实体对象
+     * @param metadata 实体元数据
+     */
+    void fillUpdate(Object entity, EntityMetadata metadata);
 
 }

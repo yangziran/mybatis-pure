@@ -2,6 +2,7 @@ package cn.kunter.mybatis.pure.spi;
 
 import cn.kunter.mybatis.pure.metadata.EntityMetadata;
 import org.mybatis.dynamic.sql.AndOrCriteriaGroup;
+
 import java.util.List;
 
 /**
@@ -9,11 +10,11 @@ import java.util.List;
  */
 public interface DataFilterHandler {
 
-	/**
-	 * 获取全局附加过滤条件
-	 * @param metadata 实体元数据
-	 * @return 全局附加过滤条件列表
-	 */
-	List<AndOrCriteriaGroup> getGlobalFilters(EntityMetadata metadata);
+    /**
+     * 获取全局附加过滤条件
+     * @param metadata 实体元数据
+     * @return 全局附加过滤条件列表
+     */
+    List<AndOrCriteriaGroup> getGlobalFilters(EntityMetadata metadata);
 
 }

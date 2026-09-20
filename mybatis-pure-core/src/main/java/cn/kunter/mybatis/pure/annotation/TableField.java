@@ -12,19 +12,19 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface TableField {
 
-	/**
-	 * 数据库列名，若为空则默认按照字段名驼峰转下划线
-	 */
-	String value() default "";
+    /**
+     * 数据库列名，若为空则默认按照字段名驼峰转下划线
+     */
+    String value() default "";
 
-	/**
-	 * 是否为数据库表有效字段，设为 false 时可完美替代 @Transient
-	 */
-	boolean exist() default true;
+    /**
+     * 是否为数据库表有效字段，设为 false 时可完美替代 @Transient
+     */
+    boolean exist() default true;
 
-	/**
-	 * 字段自动填充策略（默认不处理）
-	 */
-	FieldFill fill() default FieldFill.DEFAULT;
+    /**
+     * 字段自动填充策略（默认不处理）
+     */
+    FieldFill fill() default FieldFill.DEFAULT;
 
 }
