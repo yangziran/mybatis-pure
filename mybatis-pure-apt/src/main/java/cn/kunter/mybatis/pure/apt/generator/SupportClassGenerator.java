@@ -178,20 +178,22 @@ public class SupportClassGenerator {
      */
     private String inferJdbcType(TypeName typeName) {
         String name = typeName.toString();
-        if (name.contains("String")) return "VARCHAR";
-        if (name.contains("Integer")) return "INTEGER";
-        if (name.contains("Long")) return "BIGINT";
-        if (name.contains("Date") || name.contains("LocalDateTime")) return "TIMESTAMP";
-        if (name.contains("LocalDate")) return "DATE";
-        if (name.contains("LocalTime")) return "TIME";
-        if (name.contains("BigDecimal")) return "DECIMAL";
-        if (name.contains("Boolean")) return "BIT";
-        if (name.contains("Double")) return "DOUBLE";
-        if (name.contains("Float")) return "REAL";
-        if (name.contains("Byte")) return "TINYINT";
-        if (name.contains("Short")) return "SMALLINT";
-        if (name.contains("byte[]")) return "VARBINARY";
-        return "VARCHAR";
+        return switch (name) {
+            case "java.lang.String" -> "VARCHAR";
+            case "java.lang.Integer" -> "INTEGER";
+            case "java.lang.Long" -> "BIGINT";
+            case "java.util.Date", "java.time.LocalDateTime" -> "TIMESTAMP";
+            case "java.sql.Date", "java.time.LocalDate" -> "DATE";
+            case "java.time.LocalTime" -> "TIME";
+            case "java.math.BigDecimal" -> "DECIMAL";
+            case "java.lang.Boolean" -> "BIT";
+            case "java.lang.Double" -> "DOUBLE";
+            case "java.lang.Float" -> "REAL";
+            case "java.lang.Byte" -> "TINYINT";
+            case "java.lang.Short" -> "SMALLINT";
+            case "byte[]" -> "VARBINARY";
+            default -> "VARCHAR";
+        };
     }
 
     /**

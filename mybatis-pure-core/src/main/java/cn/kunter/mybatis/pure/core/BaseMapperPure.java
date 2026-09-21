@@ -27,10 +27,7 @@ import org.mybatis.dynamic.sql.util.SqlProviderAdapter;
 import org.mybatis.dynamic.sql.util.mybatis3.MyBatis3Utils;
 import org.mybatis.dynamic.sql.where.WhereApplier;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -43,45 +40,55 @@ public interface BaseMapperPure<T> {
     // 0. Provider 原语 (严禁暴露给上层业务直接调用)
     // ==========================================
 
-    /**  */
+    java.util.regex.Pattern WHERE_PATTERN = java.util.regex.Pattern.compile("\\bwhere\\b",
+            java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    /**
+     * 判断 SQL 语句中是否包含独立的 WHERE 关键字（忽略大小写）
+     */
+    private static boolean containsWhereClause(String sql) {
+        return sql != null && WHERE_PATTERN.matcher(sql).find();
+    }
+
+    /** 框架内部原语，业务代码禁止直接调用 */
     @InsertProvider(type = SqlProviderAdapter.class, method = "insert")
     int __executeInsert(InsertStatementProvider<T> statement);
 
-    /**  */
+    /** 框架内部原语，业务代码禁止直接调用 */
     @InsertProvider(type = SqlProviderAdapter.class, method = "insertMultiple")
     int __executeInsertMultiple(MultiRowInsertStatementProvider<T> statement);
 
-    /**  */
+    /** 框架内部原语，业务代码禁止直接调用 */
     @SelectProvider(type = SqlProviderAdapter.class, method = "select")
     List<T> __executeSelectMany(SelectStatementProvider statement);
 
-    /**  */
+    /** 框架内部原语，业务代码禁止直接调用 */
     @SelectProvider(type = SqlProviderAdapter.class, method = "select")
     Optional<T> __executeSelectOne(SelectStatementProvider statement);
 
-    /**  */
+    /** 框架内部原语，业务代码禁止直接调用 */
     @UpdateProvider(type = SqlProviderAdapter.class, method = "update")
     int __executeUpdate(UpdateStatementProvider statement);
 
-    /**  */
+    /** 框架内部原语，业务代码禁止直接调用 */
     @UpdateProvider(type = SqlProviderAdapter.class, method = "update")
     int __executeUpdateAll(UpdateStatementProvider statement);
 
-    /**  */
+    /** 框架内部原语，业务代码禁止直接调用 */
     @DeleteProvider(type = SqlProviderAdapter.class, method = "delete")
     int __executeDelete(DeleteStatementProvider statement);
 
-    /**  */
+    /** 框架内部原语，业务代码禁止直接调用 */
     @DeleteProvider(type = SqlProviderAdapter.class, method = "delete")
     int __executeDeleteAll(DeleteStatementProvider statement);
-
-    /**  */
-    @SelectProvider(type = SqlProviderAdapter.class, method = "select")
-    long __executeCount(SelectStatementProvider statement);
 
     // ==========================================
     // 1. Metadata 辅助方法
     // ==========================================
+
+    /** 框架内部原语，业务代码禁止直接调用 */
+    @SelectProvider(type = SqlProviderAdapter.class, method = "select")
+    long __executeCount(SelectStatementProvider statement);
 
     /**
      * 获取当前 Mapper 绑定的实体元数据
@@ -99,6 +106,10 @@ public interface BaseMapperPure<T> {
         return metadata().table();
     }
 
+    // ==========================================
+    // 1. 核心钩子：全量条件自动织入 (逻辑删除 / 数据权限等)
+    // ==========================================
+
     /**
      * 获取当前 Mapper 绑定的所有查询列
      * @return 查询列数组
@@ -108,7 +119,7 @@ public interface BaseMapperPure<T> {
     }
 
     // ==========================================
-    // 1. 核心钩子：全量条件自动织入 (逻辑删除 / 数据权限等)
+    // 2. 查询操作 (Select / Count)
     // ==========================================
 
     /**
@@ -117,7 +128,7 @@ public interface BaseMapperPure<T> {
      */
     @SuppressWarnings("unchecked")
     default List<AndOrCriteriaGroup> getGlobalFilters() {
-        List<AndOrCriteriaGroup> criteria = new java.util.ArrayList<>();
+        List<AndOrCriteriaGroup> criteria = new ArrayList<>();
 
         // 逻辑删除织入
         metadata().logicDeleteColumn().ifPresent(col -> {
@@ -134,10 +145,6 @@ public interface BaseMapperPure<T> {
         });
         return criteria;
     }
-
-    // ==========================================
-    // 2. 查询操作 (Select / Count)
-    // ==========================================
 
     /**
      * 根据条件查询多条记录
@@ -194,6 +201,10 @@ public interface BaseMapperPure<T> {
         return selectOne(c -> c.and(idCol, SqlBuilder.isEqualTo(id)));
     }
 
+    // ==========================================
+    // 3. 插入操作 (Insert) - 集成审计
+    // ==========================================
+
     /**
      * 根据条件统计记录数
      * @param whereApplier WHERE 条件构造器
@@ -215,10 +226,6 @@ public interface BaseMapperPure<T> {
         return __executeCount(builder.build().render(RenderingStrategies.MYBATIS3));
     }
 
-    // ==========================================
-    // 3. 插入操作 (Insert) - 集成审计
-    // ==========================================
-
     /**
      * 插入单条记录，自动触发审计填充
      * @param entity 实体对象
@@ -233,11 +240,17 @@ public interface BaseMapperPure<T> {
                     if (value != null) {
                         c.map((SqlColumn<Object>) colMeta.column()).toProperty(colMeta.field().getName());
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                    throw new MyBatisPureException("无法读取实体字段值: " + colMeta.property(), e);
+                }
             }
             return c;
         });
     }
+
+    // ==========================================
+    // 4. 更新操作 (Update) - 强安全网守护
+    // ==========================================
 
     /**
      * 批量插入多条记录，自动触发审计填充
@@ -258,10 +271,6 @@ public interface BaseMapperPure<T> {
             return c;
         });
     }
-
-    // ==========================================
-    // 4. 更新操作 (Update) - 强安全网守护
-    // ==========================================
 
     /**
      * 根据主键选择性更新记录（为空的字段不更新），自动触发审计填充
@@ -297,7 +306,7 @@ public interface BaseMapperPure<T> {
                     builder.set((SqlColumn<Object>) colMeta.column()).equalTo(val);
                 }
             } catch (IllegalAccessException e) {
-                // ignore
+                throw new MyBatisPureException("无法读取实体字段值: " + colMeta.property(), e);
             }
         }
 
@@ -328,11 +337,15 @@ public interface BaseMapperPure<T> {
         }
 
         UpdateStatementProvider provider = builder.build().render(RenderingStrategies.MYBATIS3);
-        if (!provider.getUpdateStatement().contains("where") && !provider.getUpdateStatement().contains("WHERE")) {
+        if (!containsWhereClause(provider.getUpdateStatement())) {
             throw new IllegalStateException("【安全阻断】常规 update 操作必须包含 where 条件。若确需全表更新，请显式调用 updateAll 方法！");
         }
         return __executeUpdate(provider);
     }
+
+    // ==========================================
+    // 5. 删除操作 (Delete) - 强安全网守护
+    // ==========================================
 
     /**
      * 全表更新记录
@@ -349,10 +362,6 @@ public interface BaseMapperPure<T> {
         }
         return __executeUpdateAll(builder.build().render(RenderingStrategies.MYBATIS3));
     }
-
-    // ==========================================
-    // 5. 删除操作 (Delete) - 强安全网守护
-    // ==========================================
 
     /**
      * 根据主键删除记录，支持逻辑删除
@@ -410,7 +419,7 @@ public interface BaseMapperPure<T> {
             }
 
             UpdateStatementProvider provider = builder.build().render(RenderingStrategies.MYBATIS3);
-            if (!provider.getUpdateStatement().contains("where") && !provider.getUpdateStatement().contains("WHERE")) {
+            if (!containsWhereClause(provider.getUpdateStatement())) {
                 throw new IllegalStateException("【安全阻断】常规 delete 操作必须包含 where 条件。若确需全表清空，请显式调用 deleteAll 方法！");
             }
             return __executeUpdate(provider);
@@ -429,12 +438,16 @@ public interface BaseMapperPure<T> {
             }
 
             DeleteStatementProvider provider = builder.build().render(RenderingStrategies.MYBATIS3);
-            if (!provider.getDeleteStatement().contains("where") && !provider.getDeleteStatement().contains("WHERE")) {
+            if (!containsWhereClause(provider.getDeleteStatement())) {
                 throw new IllegalStateException("【安全阻断】常规 delete 操作必须包含 where 条件。若确需全表清空，请显式调用 deleteAll 方法！");
             }
             return __executeDelete(provider);
         }
     }
+
+    // ==========================================
+    // 6. DTO 转换快捷查询 (DTO Mapping)
+    // ==========================================
 
     /**
      * 全表删除记录，支持逻辑删除
@@ -473,10 +486,6 @@ public interface BaseMapperPure<T> {
             return __executeDeleteAll(builder.build().render(RenderingStrategies.MYBATIS3));
         }
     }
-
-    // ==========================================
-    // 6. DTO 转换快捷查询 (DTO Mapping)
-    // ==========================================
 
     /**
      * 根据条件查询单条记录并转换为指定 DTO 类型

@@ -3,7 +3,6 @@ package cn.kunter.mybatis.pure.spring.spi;
 import cn.kunter.mybatis.pure.spi.DtoMapperHandler;
 import cn.kunter.mybatis.pure.spring.autoconfigure.MybatisPureContextBridge;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,7 +41,7 @@ public class SpringDtoMapperHandler implements DtoMapperHandler {
         if (springBean != null && springBean != this) {
             return springBean.convertList(sourceList, targetClass);
         }
-        return Collections.emptyList();
+        throw new IllegalStateException("未能从 Spring 容器中找到有效的 DtoMapperHandler Bean");
     }
 
 }

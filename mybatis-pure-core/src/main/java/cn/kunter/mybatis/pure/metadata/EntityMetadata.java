@@ -29,6 +29,9 @@ public final class EntityMetadata {
     private ColumnMetadata idColumn;
     private ColumnMetadata logicDeleteColumn;
 
+    private volatile List<ColumnMetadata> cachedColumns;
+    private volatile BasicColumn[] cachedSelectColumns;
+
     /**
      * 构建实体元数据
      * @param entityType 实体 Java 类型
@@ -124,7 +127,15 @@ public final class EntityMetadata {
      * @return 所有列元数据列表
      */
     public List<ColumnMetadata> columns() {
-        return new ArrayList<>(propertyColumnMap.values());
+        if (cachedColumns == null) {
+            synchronized (this) {
+                if (cachedColumns == null) {
+                    cachedColumns =
+                            java.util.Collections.unmodifiableList(new java.util.ArrayList<>(propertyColumnMap.values()));
+                }
+            }
+        }
+        return cachedColumns;
     }
 
     /**
@@ -133,36 +144,43 @@ public final class EntityMetadata {
      * @return 查询列数组
      */
     public BasicColumn[] selectColumns() {
-        return propertyColumnMap.values().stream().map(col -> col.column().as(col.property()))
-                .toArray(BasicColumn[]::new);
+        if (cachedSelectColumns == null) {
+            synchronized (this) {
+                if (cachedSelectColumns == null) {
+                    cachedSelectColumns = propertyColumnMap.values().stream()
+                            .map(col -> col.column().as(col.property())).toArray(BasicColumn[]::new);
+                }
+            }
+        }
+        return cachedSelectColumns.clone();
     }
 
     /**
      * @return 用于插入的列集合
      */
     public List<ColumnMetadata> insertColumns() {
-        return insertColumns;
+        return java.util.Collections.unmodifiableList(insertColumns);
     }
 
     /**
      * @return 用于更新的列集合
      */
     public List<ColumnMetadata> updateColumns() {
-        return updateColumns;
+        return java.util.Collections.unmodifiableList(updateColumns);
     }
 
     /**
      * @return 插入时需填充的列集合
      */
     public List<ColumnMetadata> insertFillColumns() {
-        return insertFillColumns;
+        return java.util.Collections.unmodifiableList(insertFillColumns);
     }
 
     /**
      * @return 更新时需填充的列集合
      */
     public List<ColumnMetadata> updateFillColumns() {
-        return updateFillColumns;
+        return java.util.Collections.unmodifiableList(updateFillColumns);
     }
 
     /**

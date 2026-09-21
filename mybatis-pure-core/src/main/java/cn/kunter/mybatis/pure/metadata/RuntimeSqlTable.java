@@ -18,7 +18,7 @@ public final class RuntimeSqlTable extends AliasableSqlTable<RuntimeSqlTable> {
     /**
      * 默认构造函数，使用默认表名构建运行时的 SQL 表
      */
-    public RuntimeSqlTable() {
+    private RuntimeSqlTable() {
         super("runtime_table", RuntimeSqlTable::new);
     }
 

@@ -90,10 +90,33 @@ public class EntityProcessor extends AbstractProcessor {
                 VariableElement field = (VariableElement) enclosed;
                 Set<Modifier> modifiers = field.getModifiers();
                 if (!modifiers.contains(Modifier.STATIC) && !modifiers.contains(Modifier.TRANSIENT)) {
+                    javax.lang.model.element.AnnotationMirror fieldAnno = getAnnotationMirror(field, "cn.kunter" +
+                            ".mybatis.pure.annotation.TableField");
+                    if (fieldAnno != null && "false".equals(getAnnotationValue(fieldAnno, "exist"))) {
+                        continue;
+                    }
                     fields.add(field);
                 }
             }
         }
+    }
+
+    private javax.lang.model.element.AnnotationMirror getAnnotationMirror(Element element, String annotationClassName) {
+        for (javax.lang.model.element.AnnotationMirror m : element.getAnnotationMirrors()) {
+            if (m.getAnnotationType().toString().equals(annotationClassName)) {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    private String getAnnotationValue(javax.lang.model.element.AnnotationMirror annotationMirror, String key) {
+        for (var entry : annotationMirror.getElementValues().entrySet()) {
+            if (entry.getKey().getSimpleName().toString().equals(key)) {
+                return entry.getValue().getValue().toString();
+            }
+        }
+        return null;
     }
 
 }

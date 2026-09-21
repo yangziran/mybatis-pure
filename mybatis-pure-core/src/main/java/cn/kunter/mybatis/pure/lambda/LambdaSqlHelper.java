@@ -6,24 +6,14 @@ import org.mybatis.dynamic.sql.SqlColumn;
 import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Lambda 属性桥接器，将强类型的方法引用 (如 User::getName) 映射为底层 SqlColumn
  */
 public final class LambdaSqlHelper {
 
-    private static final ThreadLocal<Serializable> LAMBDA_THREAD_LOCAL = new ThreadLocal<>();
-
-    private static final ClassValue<String> PROPERTY_CACHE = new ClassValue<>() {
-        @Override
-        protected String computeValue(Class<?> type) {
-            Serializable lambda = LAMBDA_THREAD_LOCAL.get();
-            if (lambda == null) {
-                throw new IllegalStateException("Lambda instance not found in ThreadLocal");
-            }
-            return methodToProperty(extract(lambda).getImplMethodName());
-        }
-    };
+    private static final ConcurrentHashMap<Class<?>, String> PROPERTY_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 核心便利 API：自动推断类型 注意：如果子类直接调用了继承自父类的 getter，此处解析出的 class 可能是父类，请改用带 class 参数的重载方法。
@@ -34,7 +24,7 @@ public final class LambdaSqlHelper {
         String className = lambda.getImplClass().replace('/', '.');
         try {
             Class<?> entityClass = Class.forName(className);
-            String property = getProperty(getter);
+            String property = getProperty(getter, lambda);
             return (SqlColumn<R>) MetadataCache.get(entityClass).column(property).column();
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Cannot resolve entity class from lambda.", e);
@@ -46,17 +36,15 @@ public final class LambdaSqlHelper {
      */
     @SuppressWarnings("unchecked")
     public static <T, R> SqlColumn<R> col(Class<T> entityType, SFunction<T, R> getter) {
-        String property = getProperty(getter);
+        String property = getProperty(getter, null);
         return (SqlColumn<R>) MetadataCache.get(entityType).column(property).column();
     }
 
-    private static String getProperty(SFunction<?, ?> getter) {
-        LAMBDA_THREAD_LOCAL.set(getter);
-        try {
-            return PROPERTY_CACHE.get(getter.getClass());
-        } finally {
-            LAMBDA_THREAD_LOCAL.remove();
-        }
+    private static String getProperty(SFunction<?, ?> getter, SerializedLambda lambdaOrNull) {
+        return PROPERTY_CACHE.computeIfAbsent(getter.getClass(), clazz -> {
+            SerializedLambda lambda = lambdaOrNull != null ? lambdaOrNull : extract(getter);
+            return methodToProperty(lambda.getImplMethodName());
+        });
     }
 
     private static SerializedLambda extract(Serializable lambda) {
@@ -81,8 +69,8 @@ public final class LambdaSqlHelper {
         } else if (name.startsWith("get") || name.startsWith("set")) {
             name = name.substring(3);
         } else {
-            throw new IllegalArgumentException("Error parsing property name '" + name + "'.  Didn't start with 'is', " +
-                    "'get' or 'set'.");
+            throw new IllegalArgumentException("Error parsing property name '" + name + "'.  Didn't start with 'is', "
+                    + "'get' or 'set'.");
         }
         return lowercaseFirst(name);
     }

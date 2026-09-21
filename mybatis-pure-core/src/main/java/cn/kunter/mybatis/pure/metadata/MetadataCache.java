@@ -3,7 +3,6 @@ package cn.kunter.mybatis.pure.metadata;
 import cn.kunter.mybatis.pure.annotation.*;
 import org.mybatis.dynamic.sql.SqlColumn;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -61,19 +60,6 @@ public final class MetadataCache {
                 String overrideColumnName = null;
                 if (idAnnotation != null && !idAnnotation.value().isEmpty()) {
                     overrideColumnName = idAnnotation.value();
-                } else if (idAnnotation == null) {
-                    for (Annotation ann : field.getAnnotations()) {
-                        if (ann.annotationType().getName().equals("com.baomidou.mybatisplus.annotation.TableId")) {
-                            isId = true;
-                            try {
-                                String val = (String) ann.annotationType().getMethod("value").invoke(ann);
-                                if (val != null && !val.isEmpty()) {
-                                    overrideColumnName = val;
-                                }
-                            } catch (Exception e) {}
-                            break;
-                        }
-                    }
                 }
 
                 String columnName;

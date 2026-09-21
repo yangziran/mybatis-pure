@@ -24,9 +24,12 @@ public final class MapperMetadataRegistry {
         Class<?>[] interfaces = mapperProxy.getClass().getInterfaces();
         for (Class<?> mapperInterface : interfaces) {
             // 我们寻找最终实现了 BaseMapperPure 的那个业务接口 (如 UserMapper)
-            EntityMetadata metadata = CACHE.computeIfAbsent(mapperInterface, MapperMetadataRegistry::resolveMetadata);
-            if (metadata != null) {
-                return metadata;
+            if (BaseMapperPure.class.isAssignableFrom(mapperInterface)) {
+                EntityMetadata metadata = CACHE.computeIfAbsent(mapperInterface,
+                        MapperMetadataRegistry::resolveMetadata);
+                if (metadata != null) {
+                    return metadata;
+                }
             }
         }
         throw new IllegalArgumentException("Cannot resolve EntityMetadata for proxy: " + mapperProxy.getClass());
@@ -34,11 +37,10 @@ public final class MapperMetadataRegistry {
 
     private static EntityMetadata resolveMetadata(Class<?> mapperInterface) {
         Type[] types = GenericUtils.resolveTypeArguments(mapperInterface, BaseMapperPure.class);
-        if (types != null && types.length > 0) {
-            Class<?> entityClass = (Class<?>) types[0];
+        if (types != null && types.length > 0 && types[0] instanceof Class<?> entityClass) {
             return MetadataCache.get(entityClass);
         }
-        return null;
+        throw new cn.kunter.mybatis.pure.exception.MyBatisPureException("无法从 Mapper 接口解析实体泛型: " + mapperInterface.getName());
     }
 
 }
