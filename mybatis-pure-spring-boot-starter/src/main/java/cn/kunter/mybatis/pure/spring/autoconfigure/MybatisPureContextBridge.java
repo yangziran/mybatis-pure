@@ -7,7 +7,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 /**
  * Spring 上下文持有者，用于非 Spring 托管的类获取 Bean
  */
-public class SpringContextHolder implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class MybatisPureContextBridge implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static ApplicationContext applicationContext;
 
@@ -42,8 +42,8 @@ public class SpringContextHolder implements ApplicationContextInitializer<Config
      */
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
-        if (SpringContextHolder.applicationContext == null) {
-            SpringContextHolder.applicationContext = applicationContext;
+        if (MybatisPureContextBridge.applicationContext == null) {
+            MybatisPureContextBridge.applicationContext = applicationContext;
         }
     }
 

@@ -2,7 +2,7 @@ package cn.kunter.mybatis.pure.spring.spi;
 
 import cn.kunter.mybatis.pure.metadata.EntityMetadata;
 import cn.kunter.mybatis.pure.spi.DataFilterHandler;
-import cn.kunter.mybatis.pure.spring.autoconfigure.SpringContextHolder;
+import cn.kunter.mybatis.pure.spring.autoconfigure.MybatisPureContextBridge;
 import org.mybatis.dynamic.sql.AndOrCriteriaGroup;
 
 import java.util.Collections;
@@ -20,7 +20,7 @@ public class SpringDataFilterHandler implements DataFilterHandler {
      */
     @Override
     public List<AndOrCriteriaGroup> getGlobalFilters(EntityMetadata metadata) {
-        DataFilterHandler springBean = SpringContextHolder.getBean(DataFilterHandler.class);
+        DataFilterHandler springBean = MybatisPureContextBridge.getBean(DataFilterHandler.class);
         if (springBean != null && springBean != this) {
             return springBean.getGlobalFilters(metadata);
         }

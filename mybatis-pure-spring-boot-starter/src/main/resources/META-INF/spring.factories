@@ -1,2 +1,2 @@
 org.springframework.context.ApplicationContextInitializer=\
-cn.kunter.mybatis.pure.spring.autoconfigure.SpringContextHolder
+cn.kunter.mybatis.pure.spring.autoconfigure.MybatisPureContextBridge

@@ -2,7 +2,7 @@ package cn.kunter.mybatis.pure.spring.spi;
 
 import cn.kunter.mybatis.pure.metadata.EntityMetadata;
 import cn.kunter.mybatis.pure.spi.AuditFillHandler;
-import cn.kunter.mybatis.pure.spring.autoconfigure.SpringContextHolder;
+import cn.kunter.mybatis.pure.spring.autoconfigure.MybatisPureContextBridge;
 
 /**
  * 基于 Spring 容器的审计字段填充处理器实现
@@ -16,7 +16,7 @@ public class SpringAuditFillHandler implements AuditFillHandler {
      */
     @Override
     public void fillInsert(Object entity, EntityMetadata metadata) {
-        AuditFillHandler springBean = SpringContextHolder.getBean(AuditFillHandler.class);
+        AuditFillHandler springBean = MybatisPureContextBridge.getBean(AuditFillHandler.class);
         if (springBean != null && springBean != this) {
             springBean.fillInsert(entity, metadata);
         }
@@ -29,7 +29,7 @@ public class SpringAuditFillHandler implements AuditFillHandler {
      */
     @Override
     public void fillUpdate(Object entity, EntityMetadata metadata) {
-        AuditFillHandler springBean = SpringContextHolder.getBean(AuditFillHandler.class);
+        AuditFillHandler springBean = MybatisPureContextBridge.getBean(AuditFillHandler.class);
         if (springBean != null && springBean != this) {
             springBean.fillUpdate(entity, metadata);
         }
